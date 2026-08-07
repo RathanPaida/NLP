@@ -1,0 +1,318 @@
+# Assignment 1 — Corpus Tokenization & Statistics (Telugu)
+
+Rule-based sentence and word tokenizer built from scratch (regex only, no NLTK /
+spaCy / indic-nlp), applied to two Telugu corpora. Everything runs inside a
+single Jupyter notebook —
+[Final_Tokenizer_Stats.ipynb](Final_Tokenizer_Stats.ipynb).
+
+| # | Corpus | HF repo | Access |
+|---|--------|---------|--------|
+| 1 | IndicCorpV2 (Telugu) | `ai4bharat/IndicCorpV2` | public |
+| 2 | OSCAR-2301 (Telugu)  | `oscar-corpus/OSCAR-2301` | **gated** — request access + login |
+
+---
+
+## 1. Files
+
+```
+Assignment_1/
+├── Final_Tokenizer_Stats.ipynb   # main notebook — tokenizer + pipeline + stats (the graded bit)
+├── tokenizer_and_stats.py        # standalone script version
+├── download_data.py              # utility to pull Telugu data from HF
+├── requirements.txt
+├── README.md
+└── data/
+    └── output/
+        ├── indiccorp_te_tokenized_part-00001.parquet   # tokenized output shards
+        ├── indiccorp_te_tokenized_part-00002.parquet
+        ├── ...                                          # 83 shards total
+        ├── indiccorp_te_tokenized_part-00083.parquet
+        ├── indiccorp_te_tokenized_stats.json            # statistics dump
+        └── corpus_statistics.md                         # markdown stats table
+```
+
+---
+
+## 2. Setup
+
+```bash
+pip install -r requirements.txt
+
+# OSCAR-2301 is gated. Accept the terms on the dataset page, then:
+huggingface-cli login
+```
+
+Dependencies: `datasets`, `pyarrow`, `tqdm` (all in `requirements.txt`).
+
+---
+
+## 3. Running
+
+Open **Final_Tokenizer_Stats.ipynb** and run all cells. The notebook is
+self-contained — it defines the tokenizer, streams data, writes output, and
+prints statistics.
+
+### Configuration (Cell 2)
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `INDICCORP_SPLIT` | `"tel_Telu"` | Telugu split of IndicCorpV2 |
+| `OSCAR_LANGUAGE` | `"te"` | Telugu subset of OSCAR-2301 |
+| `MAX_RECORDS` | `None` | Set to `None` for the **full** corpus, or a number for a sample |
+| `ROWS_PER_SHARD` | `1,000,000` | Sentences per Parquet shard file |
+| `COMPRESSION` | `"snappy"` | Try `"zstd"` for ~30–40% smaller files |
+| `WRITE_TXT_MIRROR` | `False` | Also write plain `.txt` alongside Parquet |
+
+### Data streaming
+
+Both corpora are loaded with `streaming=True`, so the raw data is **never fully
+downloaded to disk**. Records stream over the network one paragraph at a time.
+
+---
+
+## 4. The One Thing That Matters Most for Telugu
+
+Python's `\w` and `[^\W\d_]` **do not match Telugu combining vowel signs**
+(matras — Unicode category `Mn`). Using the "obvious" word regex silently
+destroys the data:
+
+```python
+>>> re.findall(r'[^\W\d_]+', 'తెలుగు')
+['త', 'ల', 'గ']            # matras dropped, word shredded into 3 fragments
+```
+
+Every character-count, word-count and TTR figure computed on top of that is
+wrong. The notebook solves this by scanning the Unicode database at startup
+to build a character class that includes **all** combining marks (`Mn`, `Mc`,
+`Me`) plus ZWJ/ZWNJ (`U+200C/200D`), which are word-internal in Indic scripts:
+
+```python
+>>> word_tokenize('తెలుగు భాష చాలా అందమైనది.')
+['తెలుగు', 'భాష', 'చాలా', 'అందమైనది', '.']
+```
+
+This approach is **language-agnostic** — unlike the earlier hard-coded
+`[a-zA-Z\u0C00-\u0C7F]` range, it works correctly for any script.
+
+---
+
+## 5. Tokenizer Design
+
+### Preprocessing (`preprocess_text`)
+
+1. **NFC Unicode normalization** — so identical Telugu syllables compare equal
+2. **Collapse whitespace** — multiple spaces/tabs/newlines → single space
+3. **Telugu → Arabic digits** — `౦–౯` → `0–9`
+4. **Collapse repeated sentence-end punctuation** — `...` → `.`, `!!!` → `!`
+
+### Sentence Tokenizer (`sentence_tokenize`)
+
+Splits on `. ? ! … । ॥`, but builds an **O(n) bitmask** of protected character
+positions (inside abbreviations, URLs, emails, dates, decimals, comma-numbers,
+times, digit-suffix tokens). A sentence boundary is suppressed if it falls inside
+a protected span.
+
+Trailing closing quotes and brackets (`" ' ) ] »`) are pulled into the preceding
+sentence.
+
+**Known limitation:** an abbreviation at the end of a paragraph
+(`... 5 కి.మీ.`) will not create a boundary there — disambiguating requires
+a statistical model, which is out of scope for a rule-based tokenizer.
+
+### Word Tokenizer (`word_tokenize`)
+
+A single **master regex** with named groups — first match wins, so the most
+specific pattern is tried first:
+
+| Order | Group | Kept as one token | Example |
+|-------|-------|-------------------|---------|
+| 1 | `abbrev` | yes | `కి.మీ.`, `Dr.`, `U.S.` |
+| 2 | `url` | yes | `https://www.eenadu.net/news?id=12` |
+| 3 | `email` | yes | `info@example.co.in` |
+| 4 | `date` | yes | `8-5-2021`, `01/02/2023` |
+| 5 | `time` | yes | `10:30`, `10:30:15` |
+| 6 | `comma_num` | yes | `1,00,000`, `12,34,567.89` |
+| 7 | `decimal` | yes | `9.80` |
+| 8 | `num_suffix` | yes | `2న`, `18వ` (digit + Telugu suffix) |
+| 9 | `number` | yes | `2011` |
+| 10 | `word` | yes | `తెలంగాణలో`, `don't` |
+| 11 | `punct` | one char each | `,` `।` `"` |
+
+### Tokenizer Demo
+
+```
+INPUT:  "సబ్ పోస్టాఫీసు గ్రామానికి 5 కి.మీ. లోపు ఉంది. Dr. రావు 10.5 కి.మీ.కి పైబడి. సమయం 10:30కు."
+
+SENT 1: సబ్ పోస్టాఫీసు గ్రామానికి 5 కి.మీ. లోపు ఉంది.
+TOKS:   సబ్<word> | పోస్టాఫీసు<word> | గ్రామానికి<word> | 5<number> | కి.మీ.<abbrev> | లోపు<word> | ఉంది<word> | .<punct>
+
+SENT 2: Dr. రావు 10.5 కి.మీ.కి పైబడి.
+TOKS:   Dr.<abbrev> | రావు<word> | 10.5<decimal> | కి.మీ.<abbrev> | కి<word> | పైబడి<word> | .<punct>
+
+SENT 3: సమయం 10:30కు.
+TOKS:   సమయం<word> | 10:30<time> | కు<word> | .<punct>
+```
+
+---
+
+## 6. Output Format
+
+**One row per tokenized sentence**, tokens joined by single spaces, saved as
+compressed, sharded **Parquet** files.
+
+```
+data/output/
+├── indiccorp_te_tokenized_part-00001.parquet  (~76 MB, 1M sentences)
+├── indiccorp_te_tokenized_part-00002.parquet
+├── ...
+├── indiccorp_te_tokenized_part-00083.parquet  (~39 MB, 507,030 sentences)
+└── indiccorp_te_tokenized_stats.json
+```
+
+| Column | Type | Meaning |
+|--------|------|---------|
+| `tokenized_sentence` | `string` | Tokens joined by spaces |
+
+**83 shards**, each with up to 1,000,000 rows. Total: **82,507,030 rows**,
+**~6.3 GB** on disk (Snappy compression).
+
+### Why Parquet
+
+Parquet is a **columnar** binary format: values of one column are stored
+contiguously, so a compressor sees highly similar data and achieves much better
+ratios than row-oriented formats. Key benefits:
+
+- **5–10× smaller** than equivalent `.txt`
+- **Row-group streaming** — can be read in batches without loading the full file
+- **Dictionary encoding** — repeated patterns stored once with references
+- **Block compression** — Snappy (fast) or zstd (~30–40% smaller, slightly slower)
+
+### Reading the Output
+
+```python
+import pyarrow.parquet as pq
+
+# Lazy, batch-by-batch reading (does NOT load entire file into RAM):
+pf = pq.ParquetFile("data/output/indiccorp_te_tokenized_part-00001.parquet")
+for batch in pf.iter_batches(batch_size=1000):
+    for sentence in batch.column("tokenized_sentence").to_pylist():
+        print(sentence)
+
+# Or load all shards as a dataset:
+dataset = pq.ParquetDataset("data/output/")
+table = dataset.read()
+```
+
+---
+
+## 7. Corpus Statistics
+
+Two columns are reported because "word" and "token" are not the same thing:
+
+- **ALL TOKENS** — every token the tokenizer emits, punctuation included
+- **WORDS ONLY** — punctuation tokens excluded (`label == "punct"`)
+
+### IndicCorpV2 (Telugu) — Full Corpus Results
+
+```
+==========================================================================
+CORPUS STATISTICS: IndicCorpV2 (tel_Telu)
+==========================================================================
+Metric                                     |    ALL TOKENS |    WORDS ONLY
+--------------------------------------------------------------------------
+i.   Total number of sentences             |    82,507,030 |    82,507,030
+ii.  Total number of words/tokens          |   863,456,797 |   735,129,680
+iii. Total number of characters            | 5,125,034,281 | 4,996,707,164
+iv.  Average sentence length               |         10.47 |          8.91
+v.   Average word length                   |          5.94 |          6.80
+vi.  Type/Token Ratio (TTR)                |        0.0114 |        0.0134
+--------------------------------------------------------------------------
+     Unique types (vocabulary)             |     9,854,627 |     9,853,523
+     Paragraphs processed                  |    21,458,261 |
+     Characters in cleaned raw text        | 5,834,661,179 |
+     Elapsed (s)                           |       9,202.3 |
+==========================================================================
+```
+
+### Summary Table
+
+| Metric | IndicCorpV2 (tel_Telu) |
+|---|---|
+| i. Total sentences | 82,507,030 |
+| ii. Total tokens (with punctuation) | 863,456,797 |
+| ii. Total words (no punctuation) | 735,129,680 |
+| iii. Total characters (all tokens) | 5,125,034,281 |
+| iii. Total characters (words only) | 4,996,707,164 |
+| iv. Avg sentence length (words) | 8.91 |
+| v. Avg word length (chars) | 6.80 |
+| vi. TTR (all tokens) | 0.0114 |
+| vi. TTR (words only) | 0.0134 |
+| Unique word types | 9,853,523 |
+| Paragraphs / documents | 21,458,261 |
+
+### OSCAR-2301 (Telugu)
+
+Not processed — requires HuggingFace authentication (`HF_TOKEN`). The pipeline
+is identical; set `CONFIG["HF_TOKEN"]` or run `huggingface-cli login` after
+accepting the dataset terms at
+<https://huggingface.co/datasets/oscar-corpus/OSCAR-2301>.
+
+### Definitions
+
+- **Average sentence length** = total words ÷ total sentences
+- **Average word length** = total word characters ÷ total words
+- **TTR** = unique types ÷ total tokens (computed within each column — word
+  types over word tokens, all types over all tokens)
+
+> **On TTR:** it is not comparable across corpora of different sizes — the ratio
+> falls as a corpus grows (Zipf's law). Telugu is agglutinative and heavily
+> inflected, so its type inventory is very large (~9.85M unique words). To
+> compare IndicCorpV2 against OSCAR fairly, compute TTR on equal-sized samples.
+
+---
+
+## 8. Fixes Over Earlier Drafts
+
+The notebook documents nine improvements over `NLP1.ipynb` and earlier versions:
+
+1. **TTR was computed incorrectly** — mixed word-types with all-token counts. Now
+   two separate vocabularies (`token_types`, `word_types`) are tracked.
+2. **Character counts were ambiguous** — now reported as three numbers: all
+   tokens, word tokens only, and cleaned raw text.
+3. **Punctuation detection** reused a regex instead of the tokenizer label.
+4. **Word regex was Telugu/ASCII-only** — now Unicode-general (works for any
+   script in OSCAR).
+5. **Abbreviations were protected for sentence splitting but shredded by the
+   word tokenizer** — now a first-class token group.
+6. **Sentence splitter was O(boundaries × protected spans)** — replaced with
+   an O(n) bitmask.
+7. **Single Parquet file, writer never closed on error** — now sharded with
+   `try/finally`.
+8. **Only IndicCorpV2 was handled** — pipeline is now corpus-agnostic.
+9. **Extra token classes added** — times, Indian comma numbers with decimals,
+   hyphenated/apostrophe words, Devanagari danda.
+
+---
+
+## 9. Performance Notes
+
+- Data is **streamed** (`streaming=True`) — the raw corpus is never fully
+  downloaded to disk. Only the tokenized output (~6.3 GB) is stored.
+- Statistics are accumulated **incrementally** in the `CorpusStats` class —
+  counters updated per-sentence, never requiring the full corpus in RAM.
+- The vocabulary sets (`token_types`, `word_types`) can reach several GB for
+  the full corpus (~9.85M unique entries). Set `stats.track_vocab = False`
+  to skip TTR computation if RAM is tight.
+- Full processing of IndicCorpV2 Telugu took **~2.5 hours** (~9,200 seconds).
+
+---
+
+## 10. Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `401/403` on OSCAR | Accept the terms on the dataset page, then `huggingface-cli login` |
+| Telugu words split into single letters | Ensure you are using the notebook's `word_tokenize()` — see §4 |
+| Out of memory | Set `track_vocab=False` in `CorpusStats`, or use `MAX_RECORDS` to sample |
+| Slow processing | Reduce `MAX_RECORDS` for testing; full run takes ~2.5 hours |
+| `pyarrow` not found | `pip install pyarrow` |

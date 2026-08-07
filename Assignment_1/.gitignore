@@ -1,0 +1,6 @@
+# Parquet output files (too large for git)
+*.parquet
+
+# Large raw data
+te.txt
+data/
