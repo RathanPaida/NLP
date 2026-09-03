@@ -1,0 +1,16 @@
+digraph dfa_english_word {
+	graph [rankdir=LR]
+	node [fontsize=12 shape=circle]
+	edge [fontsize=10]
+	"" [label="" shape=plaintext]
+	q1 [label=q1 shape=doublecircle]
+	q_dead [label=q_dead shape=circle]
+	q0 [label=q0 shape=circle]
+	"" -> q0 [label=""]
+	q0 -> q1 [label="a-z"]
+	q0 -> q_dead [label=OTHER]
+	q1 -> q1 [label="a-z"]
+	q1 -> q_dead [label=OTHER]
+	q_dead -> q_dead [label="a-z"]
+	q_dead -> q_dead [label=OTHER]
+}
