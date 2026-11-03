@@ -1,0 +1,244 @@
+{
+  "model_name": "Word2Vec-GoogleNews-300d",
+  "vocab_size": 3000000,
+  "elapsed_seconds": 258.1563310623169,
+  "analogy_a": [
+    [
+      "terrific",
+      0.6986191272735596
+    ],
+    [
+      "superb",
+      0.6440028548240662
+    ],
+    [
+      "fantastic",
+      0.6409966349601746
+    ],
+    [
+      "great",
+      0.6319711208343506
+    ],
+    [
+      "exceptional",
+      0.5893022418022156
+    ]
+  ],
+  "analogy_b": [
+    [
+      "delievery",
+      0.46103477478027344
+    ],
+    [
+      "twitch_muscles",
+      0.42857083678245544
+    ],
+    [
+      "Delivery",
+      0.4249102771282196
+    ],
+    [
+      "Eat##Hours.com",
+      0.39901983737945557
+    ],
+    [
+      "www.BobBruss.com",
+      0.39756283164024353
+    ]
+  ],
+  "analogy_benchmark": {
+    "overall_accuracy": 70.85714285714285,
+    "total_tested": 2100,
+    "total_correct": 1488,
+    "section_metrics": {
+      "capital-common-countries": {
+        "total_in_section": 506,
+        "tested": 150,
+        "correct": 120,
+        "accuracy": 80.0
+      },
+      "capital-world": {
+        "total_in_section": 4524,
+        "tested": 150,
+        "correct": 120,
+        "accuracy": 80.0
+      },
+      "currency": {
+        "total_in_section": 866,
+        "tested": 150,
+        "correct": 52,
+        "accuracy": 34.66666666666667
+      },
+      "city-in-state": {
+        "total_in_section": 2467,
+        "tested": 150,
+        "correct": 111,
+        "accuracy": 74.0
+      },
+      "family": {
+        "total_in_section": 506,
+        "tested": 150,
+        "correct": 127,
+        "accuracy": 84.66666666666667
+      },
+      "gram1-adjective-to-adverb": {
+        "total_in_section": 992,
+        "tested": 150,
+        "correct": 46,
+        "accuracy": 30.666666666666664
+      },
+      "gram2-opposite": {
+        "total_in_section": 812,
+        "tested": 150,
+        "correct": 68,
+        "accuracy": 45.33333333333333
+      },
+      "gram3-comparative": {
+        "total_in_section": 1332,
+        "tested": 150,
+        "correct": 131,
+        "accuracy": 87.33333333333333
+      },
+      "gram4-superlative": {
+        "total_in_section": 1122,
+        "tested": 150,
+        "correct": 128,
+        "accuracy": 85.33333333333334
+      },
+      "gram5-present-participle": {
+        "total_in_section": 1056,
+        "tested": 150,
+        "correct": 121,
+        "accuracy": 80.66666666666666
+      },
+      "gram6-nationality-adjective": {
+        "total_in_section": 1599,
+        "tested": 150,
+        "correct": 135,
+        "accuracy": 90.0
+      },
+      "gram7-past-tense": {
+        "total_in_section": 1560,
+        "tested": 150,
+        "correct": 94,
+        "accuracy": 62.66666666666667
+      },
+      "gram8-plural": {
+        "total_in_section": 1332,
+        "tested": 150,
+        "correct": 135,
+        "accuracy": 90.0
+      },
+      "gram9-plural-verbs": {
+        "total_in_section": 870,
+        "tested": 150,
+        "correct": 100,
+        "accuracy": 66.66666666666666
+      }
+    }
+  },
+  "nn_mean": {
+    "accuracy": 81.10000000000001,
+    "macro_precision": 81.23436397459747,
+    "macro_recall": 81.18348003250198,
+    "macro_f1": 81.09771282325161,
+    "confusion_matrix": [
+      [
+        411,
+        76
+      ],
+      [
+        113,
+        400
+      ]
+    ],
+    "history": {
+      "train_loss": [
+        0.5613908926963807,
+        0.43745898342132566,
+        0.4222801546573639,
+        0.4097586769104004,
+        0.40813820533752443,
+        0.4012166600227356,
+        0.3962398205757141,
+        0.39470558557510377,
+        0.3897011545181274,
+        0.3876817928314209,
+        0.383199814414978,
+        0.3834538216114044,
+        0.37974317560195925,
+        0.3799427298545837,
+        0.37312989106178285
+      ],
+      "train_acc": [
+        72.89999999999999,
+        80.38,
+        81.10000000000001,
+        81.69999999999999,
+        81.45,
+        82.14,
+        82.54,
+        82.45,
+        82.83,
+        82.6,
+        83.12,
+        82.82000000000001,
+        83.06,
+        82.76,
+        83.58
+      ]
+    }
+  },
+  "nn_tfidf": {
+    "accuracy": 79.4,
+    "macro_precision": 79.78538364993078,
+    "macro_recall": 79.54217050726291,
+    "macro_f1": 79.3761588396186,
+    "confusion_matrix": [
+      [
+        414,
+        73
+      ],
+      [
+        133,
+        380
+      ]
+    ],
+    "history": {
+      "train_loss": [
+        0.5674111408710479,
+        0.4538660747528076,
+        0.43959747152328493,
+        0.42895253100395203,
+        0.42697289531230925,
+        0.4195682772636414,
+        0.4152825825691223,
+        0.41389429841041564,
+        0.4081751326084137,
+        0.405369282245636,
+        0.4001654314517975,
+        0.40074775981903077,
+        0.395894118976593,
+        0.3940469816684723,
+        0.3887986424446106
+      ],
+      "train_acc": [
+        72.21,
+        79.03999999999999,
+        79.93,
+        80.60000000000001,
+        80.54,
+        80.74,
+        81.08999999999999,
+        81.07,
+        81.8,
+        81.71000000000001,
+        82.32000000000001,
+        81.94,
+        82.47,
+        81.94,
+        82.78
+      ]
+    }
+  }
+}

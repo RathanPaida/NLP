@@ -12,3 +12,11 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Large Embedding Data & Model Weights
+*.vec
+*.vec.zip
+*.gz
+*.bin
+*.npy
+Assignment_10/data/glove.6B.300d.txt

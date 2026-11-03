@@ -24,6 +24,7 @@ The repository spans statistical language modeling, subword tokenization, finite
 | **7** | **Hindi POS Tagging (NB & HMM)** | Naive Bayes, Bigram HMM (Forward, Backward, FB Max-Product, FB Posterior) | BIS Tagset (Hindi, 15k sents) | **92.84%** Test Acc | [View](./Assignment_7/) |
 | **8** | **Midsem Solutions & Spell Correction** | Preprocessing, WordPiece, Monsoon Midsem Q1–Q5, Noisy Channel Model | Web 1T Unigrams, Peter Norvig | **77.32%** Top-1 (1-edit) | [View](./Assignment_8/) |
 | **9** | **MEMM & CRF for Hindi POS Tagging** | Subword features, MEMM, Linear-Chain CRF (`sklearn-crfsuite`), 4-Way Study | BIS Tagset (Hindi, 15k sents) | **96.51%** Test Acc | [View](./Assignment_9/) |
+| **10** | **Word Embeddings & Sentiment Classification** | Word2Vec, GloVe, FastText, Vector Analogies, Mean vs TF-IDF Pooling, PyTorch NN | Amazon Reviews Polarity | **81.10%** Macro F1 / **84.00%** Analogy | [View](./Assignment_10/) |
 
 ---
 
@@ -148,6 +149,22 @@ The repository spans statistical language modeling, subword tokenization, finite
 
 ---
 
+### [Assignment 10 — Word Embeddings (Word2Vec, GloVe, FastText), Semantic Analogies & Sentiment Classification](./Assignment_10/)
+- **Objective:** Comprehensive comparative evaluation of distributed word representation paradigms (Google News Word2Vec 300d, GloVe 6B 300d, FastText Subword 300d) across vector analogies and downstream sentiment classification on Amazon Reviews.
+- **Key Deliverables & Methodologies:**
+  - **Q1 (Preprocessing & Sentence Representation):** Stratified sampling of 10,000 train and 1,000 test reviews; lowercasing, punctuation/number removal, tokenization, stopword filtering; sentence representations via **Mean Pooling** vs **TF-IDF Weighted Pooling**.
+  - **Q2 (Vector Arithmetic & Google Analogy Benchmark):**
+    - Target queries: $\text{good} - \text{bad} + \text{excellent} = \text{terrific} / \text{superb}$; $\text{delivery} - \text{late} + \text{fast} = \text{faster} / \text{super-fast}$.
+    - Google Analogy Benchmark (`questions-words.txt`, 14 categories): **FastText 84.00%**, **Word2Vec 70.86%**, **GloVe 66.48%**.
+  - **Q3 (Single-Hidden-Layer Neural Network):** PyTorch feedforward network ($300 \to 128 \to 2$ with ReLU & Dropout) trained across 6 configurations:
+    - **Word2Vec (Mean): 81.10% Macro F1** (Top Performer)
+    - **FastText (Mean): 80.09% Macro F1**
+    - **GloVe (Mean): 79.40% Macro F1**
+    - Consistent finding: Mean Pooling outperforms TF-IDF Weighted Pooling ($+0.80\%$ to $+1.72\%$) because TF-IDF suppresses frequent evaluative sentiment adjectives.
+- **Notebook & Documentation:** [`NLP_Lab_Assignment_10.ipynb`](./Assignment_10/NLP_Lab_Assignment_10.ipynb), [`README.md`](./Assignment_10/README.md).
+
+---
+
 ## Repository File Tree
 
 ```
@@ -203,14 +220,27 @@ NLP/
 │       ├── count_unigram.txt                           # Google Web 1T Trillion unigram word counts
 │       └── spell-errors.txt                            # 39,000+ real-world spelling error pairs
 │
-└── Assignment_9/                                       # MEMM & CRF for Hindi POS Tagging (4-Way Study)
-    ├── NLP-Lab-Assignment-9-2026.pdf                   # Official assignment specification
-    ├── NLP_Lab_Assignment_9.ipynb                     # Executed notebook with MEMM, CRF, plots, & benchmarks
-    ├── README.md
-    └── Hindi-POS-Data/
-        ├── hindi-train-pos.txt                         # 15,087 sentences (325,710 tokens)
-        ├── hindi-dev-pos.txt                           # 1,866 sentences (40,762 tokens)
-        └── hindi-test-pos.txt                          # 1,910 sentences (41,415 tokens)
+├── Assignment_9/                                       # MEMM & CRF for Hindi POS Tagging (4-Way Study)
+│   ├── NLP-Lab-Assignment-9-2026.pdf                   # Official assignment specification
+│   ├── NLP_Lab_Assignment_9.ipynb                     # Executed notebook with MEMM, CRF, plots, & benchmarks
+│   ├── README.md
+│   └── Hindi-POS-Data/
+│       ├── hindi-train-pos.txt                         # 15,087 sentences (325,710 tokens)
+│       ├── hindi-dev-pos.txt                           # 1,866 sentences (40,762 tokens)
+│       └── hindi-test-pos.txt                          # 1,910 sentences (41,415 tokens)
+│
+└── Assignment_10/                                      # Word Embeddings, Analogies & Sentiment Classification
+    ├── NLP_Lab_Assignment_10.ipynb                    # Executed interactive notebook (all models, plots & tables)
+    ├── README.md                                       # Comprehensive academic lab report
+    ├── questions-words.txt                             # Google Analogy benchmark dataset
+    ├── model_utils.py                                  # Embedding pooling, analogies, and SimpleNN module
+    ├── prepare_data.py                                 # Stratified sampling and text preprocessing
+    ├── run_glove.py                                    # GloVe experiment runner
+    ├── run_fasttext.py                                 # FastText experiment runner
+    ├── run_word2vec.py                                 # Word2Vec experiment runner
+    ├── generate_plots.py                               # Publication-quality figure generation
+    ├── plots/                                          # Visualizations (Macro F1, Analogies, Curves, CMs)
+    └── results/                                        # JSON results for all 3 models
 ```
 
 ---

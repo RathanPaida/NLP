@@ -1,0 +1,244 @@
+{
+  "model_name": "GloVe-6B-300d",
+  "vocab_size": 400000,
+  "elapsed_seconds": 267.82959485054016,
+  "analogy_a": [
+    [
+      "superb",
+      0.5926157832145691
+    ],
+    [
+      "terrific",
+      0.5719386339187622
+    ],
+    [
+      "wonderful",
+      0.5324779748916626
+    ],
+    [
+      "quality",
+      0.5093278288841248
+    ],
+    [
+      "great",
+      0.5008903741836548
+    ]
+  ],
+  "analogy_b": [
+    [
+      "faster",
+      0.47034794092178345
+    ],
+    [
+      "deliveries",
+      0.46527913212776184
+    ],
+    [
+      "bowler",
+      0.4512387812137604
+    ],
+    [
+      "slow",
+      0.4483119249343872
+    ],
+    [
+      "pace",
+      0.44423744082450867
+    ]
+  ],
+  "analogy_benchmark": {
+    "overall_accuracy": 66.47619047619048,
+    "total_tested": 2100,
+    "total_correct": 1396,
+    "section_metrics": {
+      "capital-common-countries": {
+        "total_in_section": 506,
+        "tested": 150,
+        "correct": 139,
+        "accuracy": 92.66666666666666
+      },
+      "capital-world": {
+        "total_in_section": 4524,
+        "tested": 150,
+        "correct": 145,
+        "accuracy": 96.66666666666667
+      },
+      "currency": {
+        "total_in_section": 866,
+        "tested": 150,
+        "correct": 25,
+        "accuracy": 16.666666666666664
+      },
+      "city-in-state": {
+        "total_in_section": 2467,
+        "tested": 150,
+        "correct": 96,
+        "accuracy": 64.0
+      },
+      "family": {
+        "total_in_section": 506,
+        "tested": 150,
+        "correct": 132,
+        "accuracy": 88.0
+      },
+      "gram1-adjective-to-adverb": {
+        "total_in_section": 992,
+        "tested": 150,
+        "correct": 32,
+        "accuracy": 21.333333333333336
+      },
+      "gram2-opposite": {
+        "total_in_section": 812,
+        "tested": 150,
+        "correct": 48,
+        "accuracy": 32.0
+      },
+      "gram3-comparative": {
+        "total_in_section": 1332,
+        "tested": 150,
+        "correct": 129,
+        "accuracy": 86.0
+      },
+      "gram4-superlative": {
+        "total_in_section": 1122,
+        "tested": 150,
+        "correct": 110,
+        "accuracy": 73.33333333333333
+      },
+      "gram5-present-participle": {
+        "total_in_section": 1056,
+        "tested": 150,
+        "correct": 106,
+        "accuracy": 70.66666666666667
+      },
+      "gram6-nationality-adjective": {
+        "total_in_section": 1599,
+        "tested": 150,
+        "correct": 140,
+        "accuracy": 93.33333333333333
+      },
+      "gram7-past-tense": {
+        "total_in_section": 1560,
+        "tested": 150,
+        "correct": 90,
+        "accuracy": 60.0
+      },
+      "gram8-plural": {
+        "total_in_section": 1332,
+        "tested": 150,
+        "correct": 120,
+        "accuracy": 80.0
+      },
+      "gram9-plural-verbs": {
+        "total_in_section": 870,
+        "tested": 150,
+        "correct": 84,
+        "accuracy": 56.00000000000001
+      }
+    }
+  },
+  "nn_mean": {
+    "accuracy": 79.4,
+    "macro_precision": 79.39751759007036,
+    "macro_recall": 79.41728608539373,
+    "macro_f1": 79.39596160847526,
+    "confusion_matrix": [
+      [
+        390,
+        97
+      ],
+      [
+        109,
+        404
+      ]
+    ],
+    "history": {
+      "train_loss": [
+        0.5463953430175781,
+        0.452651326751709,
+        0.44084602551460267,
+        0.42999198355674745,
+        0.4289100959777832,
+        0.4203666708946228,
+        0.41341267442703244,
+        0.4103149022102356,
+        0.4024318821430206,
+        0.3982667125225067,
+        0.39105699257850646,
+        0.3895378112316132,
+        0.384554319190979,
+        0.3823471480369568,
+        0.3737492465019226
+      ],
+      "train_acc": [
+        72.8,
+        79.10000000000001,
+        79.42,
+        80.12,
+        80.4,
+        80.45,
+        81.39,
+        81.27,
+        81.63,
+        82.04,
+        82.32000000000001,
+        82.50999999999999,
+        82.82000000000001,
+        82.96,
+        83.27
+      ]
+    }
+  },
+  "nn_tfidf": {
+    "accuracy": 78.3,
+    "macro_precision": 78.31967803363685,
+    "macro_recall": 78.33475429390269,
+    "macro_f1": 78.29893664789574,
+    "confusion_matrix": [
+      [
+        388,
+        99
+      ],
+      [
+        118,
+        395
+      ]
+    ],
+    "history": {
+      "train_loss": [
+        0.5548385499954224,
+        0.4701967210769653,
+        0.4595302117347717,
+        0.4499661383152008,
+        0.44617163410186766,
+        0.4359382890701294,
+        0.42746611366271975,
+        0.42220006790161135,
+        0.41344941654205325,
+        0.4062924787044525,
+        0.39736788053512573,
+        0.3908425242424011,
+        0.3846482540130615,
+        0.38026326785087583,
+        0.3694761775493622
+      ],
+      "train_acc": [
+        72.45,
+        77.56,
+        78.24,
+        79.03,
+        79.59,
+        79.47999999999999,
+        80.17,
+        80.7,
+        81.34,
+        81.76,
+        82.14,
+        82.59,
+        82.85,
+        83.23,
+        83.39
+      ]
+    }
+  }
+}
