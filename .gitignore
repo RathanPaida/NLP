@@ -18,5 +18,5 @@ Thumbs.db
 *.vec.zip
 *.gz
 *.bin
-*.npy
 Assignment_10/data/glove.6B.300d.txt
+!Assignment_10/data/embeddings/*.npy
